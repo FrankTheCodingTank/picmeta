@@ -1,8 +1,13 @@
 /**
  * GPS coordinate parser and formatter.
  *
+ * BUG (#3): The DMS-to-decimal conversion truncates seconds to integer
+ * before dividing by 3600, losing sub-second precision. For a coordinate
+ * like 43° 39' 11.52" N, the parser returns 43.6532° instead of 43.65320°
+ * — a ~30m error at mid-latitudes.
+ *
  * The seconds field in EXIF GPS is stored as a RATIONAL (two uint32),
- * so it can carry fractional seconds.
+ * so it CAN carry fractional seconds. We're just dropping them.
  */
 
 /**
@@ -10,12 +15,14 @@
  *
  * @param {number} degrees
  * @param {number} minutes
- * @param {number} seconds
+ * @param {number} seconds — BUG: truncated to int before conversion
  * @param {string} ref — N/S/E/W
  * @returns {number} decimal degrees
  */
 export function dmsToDecimal(degrees, minutes, seconds, ref) {
-  const decimal = degrees + minutes / 60 + seconds / 3600;
+  // BUG: Math.floor truncates fractional seconds
+  const secs = Math.floor(seconds);
+  const decimal = degrees + minutes / 60 + secs / 3600;
   return (ref === 'S' || ref === 'W') ? -decimal : decimal;
 }
 
