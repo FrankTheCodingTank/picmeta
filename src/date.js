@@ -1,9 +1,15 @@
 /**
  * EXIF date parser and formatter.
  *
+ * BUG (#3): formatDate ignores the OffsetTimeOriginal tag (0x9011).
  * EXIF stores dates as "YYYY:MM:DD HH:MM:SS" with NO timezone info
  * in the DateTimeOriginal tag itself. The timezone is in a separate
- * OffsetTimeOriginal tag (e.g. "-05:00").
+ * OffsetTimeOriginal tag (e.g. "-05:00"). We currently ignore this
+ * and return the date as-is, which means all dates appear to be UTC.
+ *
+ * Real-world impact: a photo taken at 14:30 in Toronto (UTC-5) shows
+ * as 14:30 UTC instead of 14:30 EST. If a consumer converts to local
+ * time, they get 09:30 EST — 5 hours off.
  */
 
 /**
@@ -31,8 +37,10 @@ export function parseExifDate(exifDate) {
 /**
  * Format an EXIF date for display.
  *
+ * BUG: ignores offsetTime parameter even when provided.
+ *
  * @param {string} exifDate — "YYYY:MM:DD HH:MM:SS"
- * @param {string} [offsetTime] — e.g. "-05:00"
+ * @param {string} [offsetTime] — e.g. "-05:00" (IGNORED — BUG)
  * @returns {string}
  */
 export function formatDate(exifDate, offsetTime) {
@@ -40,11 +48,8 @@ export function formatDate(exifDate, offsetTime) {
   if (!parsed) return 'Invalid date';
   const { year, month, day, hour, minute, second } = parsed;
 
+  // BUG: offsetTime is accepted but never used
+  // Should apply offset to produce correct local time display
   const pad = (n) => String(n).padStart(2, '0');
-  const formatted = `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
-  return isValidOffset(offsetTime) ? `${formatted} ${offsetTime}` : formatted;
-}
-
-function isValidOffset(offsetTime) {
-  return typeof offsetTime === 'string' && /^[+-]\d{2}:\d{2}$/.test(offsetTime);
+  return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
 }
