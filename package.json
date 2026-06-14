@@ -1,0 +1,12 @@
+{
+  "name": "picmeta",
+  "version": "0.2.4",
+  "description": "Lightweight EXIF and XMP metadata parser for Node.js",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node tests/exif.test.js && node tests/gps.test.js"
+  },
+  "keywords": ["exif", "xmp", "metadata", "image", "gps", "photo"],
+  "license": "MIT"
+}
