@@ -10,14 +10,14 @@ const toronto = {
 
 const coords = parseGPS(toronto);
 
-// BUG: this test FAILS because seconds are truncated to int
-// Expected: 43.6426, Actual: 43.6425 (off by ~10m)
+assert.equal(dmsToDecimal(43, 38, 33.36, 'N').toFixed(6), '43.642600');
+assert.equal(dmsToDecimal(79, 23, 13.56, 'W').toFixed(6), '-79.387100');
+
 assert.ok(
   Math.abs(coords.latitude - 43.6426) < 0.0001,
   `Latitude precision: expected ~43.6426, got ${coords.latitude}`
 );
 
-// BUG: same truncation issue on longitude
 assert.ok(
   Math.abs(coords.longitude - (-79.3871)) < 0.0001,
   `Longitude precision: expected ~-79.3871, got ${coords.longitude}`
@@ -38,4 +38,4 @@ assert.ok(
   `NYC latitude: expected ~40.7128, got ${intCoords.latitude}`
 );
 
-console.log('GPS tests passed (known precision issue with fractional seconds)');
+console.log('GPS tests passed');
